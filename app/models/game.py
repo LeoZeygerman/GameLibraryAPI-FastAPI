@@ -1,6 +1,7 @@
 from sqlalchemy import ForeignKey
 from models.base import Base
 from sqlalchemy.orm import Mapped, mapped_column, relationship
+from app.models import PlatformsOrm
 
 class GamesOrm(Base):
     __tablename__ = 'games'
