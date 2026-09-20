@@ -1,4 +1,4 @@
-from pydantic import BaseModel
+from pydantic import BaseModel, ConfigDict
 from app.schemas.genre import ResponseGenre
 from app.schemas.platform import ResponsePlatform
 
@@ -11,12 +11,17 @@ class CreateGame(BaseModel):
 
 class ResponseGame(BaseModel):
     id: int
+    game_title: str
     description: str
     release_year: int
     platform: ResponsePlatform
-    genre: ResponseGenre
+    genres: ResponseGenre
+
+    model_config = ConfigDict(from_attributes=True)
 
 class ResponseGameForGenre(BaseModel):
     game_title: str
     release_year: int
-    platform: str
+    platform: ResponsePlatform
+
+    model_config = ConfigDict(from_attributes=True)
