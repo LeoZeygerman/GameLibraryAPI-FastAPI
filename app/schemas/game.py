@@ -15,3 +15,8 @@ class ResponseGame(BaseModel):
     release_year: int
     platform: ResponsePlatform
     genre: ResponseGenre
+
+class ResponseGameForGenre(BaseModel):
+    game_title: str
+    release_year: int
+    platform: str
