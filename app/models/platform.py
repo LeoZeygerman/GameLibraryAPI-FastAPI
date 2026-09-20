@@ -6,7 +6,7 @@ class PlatformsOrm(Base):
     __tablename__ = 'platforms'
 
     id: Mapped[int] = mapped_column(primary_key=True)
-    platform_title: Mapped[str]
+    platform_title: Mapped[str] = mapped_column(unique=True)
 
     games: Mapped[list['GamesOrm']] = relationship(
         back_populates='platform'

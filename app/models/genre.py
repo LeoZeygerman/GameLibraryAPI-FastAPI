@@ -5,9 +5,9 @@ class GenresOrm(Base):
     __tablename__ = 'genres'
 
     id: Mapped[int] = mapped_column(primary_key=True)
-    genre_title: Mapped[str]
+    genre_title: Mapped[str] = mapped_column(unique=True)
 
-    games: Mapped['GamesOrm'] = relationship(
+    games: Mapped[list['GamesOrm']] = relationship(
         secondary='game_genre',
         back_populates='genres'
     )

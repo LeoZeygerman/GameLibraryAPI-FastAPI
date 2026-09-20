@@ -7,7 +7,7 @@ class GamesOrm(Base):
     __tablename__ = 'games'
 
     id: Mapped[int] = mapped_column(primary_key=True)
-    game_title: Mapped[str]
+    game_title: Mapped[str] = mapped_column(unique=True)
     description: Mapped[str]
     release_year: Mapped[int]
 
