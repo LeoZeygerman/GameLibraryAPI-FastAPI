@@ -58,7 +58,7 @@ async def create_game(session: SessionDep, game: CreateGame):
     return result.scalar_one()
 
 
-@router.get('/{game_name}', summary='Получить игру по названию', response_model=ResponseGame)
+@router.get('/get-by-name/{game_name}', summary='Получить игру по названию', response_model=ResponseGame)
 async def get_game_by_name(session: SessionDep, game_name: str):
     result = await session.execute(
         select(GamesOrm)
@@ -74,7 +74,7 @@ async def get_game_by_name(session: SessionDep, game_name: str):
     return game
 
 
-@router.patch('/{game_name}', summary='Изменить игру', response_model=ResponseGame)
+@router.patch('/update/{game_name}', summary='Изменить игру', response_model=ResponseGame)
 async def update_game(session: SessionDep, game_name: str, game: UpdateGame):
     query = await session.execute(
         select(GamesOrm)
@@ -123,3 +123,20 @@ async def update_game(session: SessionDep, game_name: str, game: UpdateGame):
                 await session.flush()
             new_genres.append(genre)
         result.genres = new_genres
+
+
+@router.delete('/delete/{game_id}', summary='Удалить игру')
+async def delete_game(session: SessionDep, game_id: int):
+    game = await session.scalar(
+        select(GamesOrm)
+        .where(GamesOrm.id == game_id)
+        .options(
+            selectinload(GamesOrm.genres),
+            selectinload(GamesOrm.platform)
+        )
+    )
+    if game is None:
+        raise HTTPException(status_code=404, detail='Игра не найдена!')
+    session.delete(game)
+    await session.commit()
+    return f'Игра удалена!'
