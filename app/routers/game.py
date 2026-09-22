@@ -2,7 +2,7 @@ from fastapi import APIRouter, HTTPException
 from sqlalchemy import select
 from sqlalchemy.orm import selectinload
 from app.database import SessionDep
-from app.schemas.game import CreateGame, ResponseGame
+from app.schemas.game import CreateGame, ResponseGame, UpdateGame
 from app.models.game import GamesOrm
 from app.models.platform import PlatformsOrm
 from app.models.genre import GenresOrm
@@ -72,3 +72,54 @@ async def get_game_by_name(session: SessionDep, game_name: str):
     if not game:
         raise HTTPException(status_code=404, detail='Игра не найдена!')
     return game
+
+
+@router.patch('/{game_name}', summary='Изменить игру', response_model=ResponseGame)
+async def update_game(session: SessionDep, game_name: str, game: UpdateGame):
+    query = await session.execute(
+        select(GamesOrm)
+        .where(GamesOrm.game_title == game_name)
+        .options(
+            selectinload(GamesOrm.genres),
+            selectinload(GamesOrm.platform)
+        )
+    )
+    result = query.scalar_one_or_none()
+    if result is None:
+        raise HTTPException(status_code=404, detail='Игра не найдена!')
+    changes = game.model_dump(exclude_unset=True)
+
+    simple_fields = ['game_title', 'description', 'release_year']
+    for field in simple_fields:
+        if field in changes:
+            setattr(result, field, changes[field])
+
+    if 'platform' in changes:
+        platform_title_changes = changes['platform']
+        query = await session.scalar(
+            select(PlatformsOrm)
+            .where(PlatformsOrm.platform_title == platform_title_changes)
+        )
+        if query is None:
+            query = PlatformsOrm(
+                platform_title = platform_title_changes
+            )
+            session.add(query)
+            await session.flush()
+        result.platform = query
+
+    if 'genres' in changes:
+        new_genres = []
+        for new_genre_title in changes['genres']:
+            genre = await session.scalar(
+                select(GenresOrm)
+                .where(GenresOrm.genre_title == new_genre_title)
+            )
+            if genre is None:
+                genre = GenresOrm(
+                    genre_title = new_genre_title
+                )
+                session.add(genre)
+                await session.flush()
+            new_genres.append(genre)
+        result.genres = new_genres

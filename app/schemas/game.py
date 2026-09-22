@@ -19,6 +19,13 @@ class ResponseGame(BaseModel):
 
     model_config = ConfigDict(from_attributes=True)
 
+class UpdateGame(BaseModel):
+    game_title: str | None = None
+    description: str | None = None
+    release_year: int | None = None
+    platform: str | None = None
+    genres: list[str] | None = None
+
 class ResponseGameForGenre(BaseModel):
     game_title: str
     release_year: int
