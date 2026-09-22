@@ -1,4 +1,4 @@
-from fastapi import APIRouter
+from fastapi import APIRouter, HTTPException
 from sqlalchemy import select
 from sqlalchemy.orm import selectinload
 from app.database import SessionDep
@@ -56,3 +56,19 @@ async def create_game(session: SessionDep, game: CreateGame):
             )
     )
     return result.scalar_one()
+
+
+@router.get('/{game_name}', summary='Получить игру по названию', response_model=ResponseGame)
+async def get_game_by_name(session: SessionDep, game_name: str):
+    result = await session.execute(
+        select(GamesOrm)
+        .where(GamesOrm.game_title == game_name)
+        .options(
+            selectinload(GamesOrm.genres),
+            selectinload(GamesOrm.platform)
+        )
+    )
+    game = result.scalar_one_or_none()
+    if not game:
+        raise HTTPException(status_code=404, detail='Игра не найдена!')
+    return game
