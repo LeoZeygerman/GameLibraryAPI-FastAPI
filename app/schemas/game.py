@@ -7,15 +7,15 @@ class CreateGame(BaseModel):
     description: str
     release_year: int
     platform: str
-    genre: list[str]
+    genres: list[str]
 
 class ResponseGame(BaseModel):
     id: int
     game_title: str
     description: str
     release_year: int
-    platform: ResponsePlatform
-    genres: ResponseGenre
+    platform: list[ResponsePlatform]
+    genres: list[ResponseGenre]
 
     model_config = ConfigDict(from_attributes=True)
 
@@ -36,4 +36,4 @@ class ResponseGameForGenre(BaseModel):
 
 class ResponseGameForPlatform(BaseModel):
     game_title: str
-    genres: ResponseGenre
+    genres: list[ResponseGenre]

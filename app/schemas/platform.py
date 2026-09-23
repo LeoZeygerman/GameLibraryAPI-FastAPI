@@ -4,7 +4,7 @@ from app.schemas.game import ResponseGameForPlatform
 class ResponsePlatformWithGames(BaseModel):
     id: int
     platform_title: str 
-    games: ResponseGameForPlatform
+    games: list[ResponseGameForPlatform]
 
     model_config = ConfigDict(from_attributes=True)
 

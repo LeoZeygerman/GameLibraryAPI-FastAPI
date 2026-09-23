@@ -7,7 +7,7 @@ from app.models.platform import PlatformsOrm
 from app.database import SessionDep
 
 @router.post('/platforms', summary='Добавить платформу', response_model=ResponsePlatform)
-async def create_platform(session: SessionDep, platform = CreatePlatform):
+async def create_platform(session: SessionDep, platform: CreatePlatform):
     new_platform = PlatformsOrm(platform_title = platform.platform_title)
     session.add(new_platform)
     await session.commit()
