@@ -32,3 +32,8 @@ class ResponseGameForGenre(BaseModel):
     platform: ResponsePlatform
 
     model_config = ConfigDict(from_attributes=True)
+
+
+class ResponseGameForPlatform(BaseModel):
+    game_title: str
+    genres: ResponseGenre
