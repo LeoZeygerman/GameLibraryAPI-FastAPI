@@ -1,5 +1,9 @@
 from pydantic import BaseModel, ConfigDict
 from app.schemas.game import ResponseGameForPlatform
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from app.schemas.game import ResponseGameForPlatform
 
 class ResponsePlatformWithGames(BaseModel):
     id: int

@@ -1,6 +1,11 @@
 from pydantic import BaseModel, ConfigDict
 from app.schemas.genre import ResponseGenre
 from app.schemas.platform import ResponsePlatform
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from app.schemas.genre import ResponseGenre
+    from app.schemas.platform import ResponsePlatform
 
 class CreateGame(BaseModel):
     game_title: str

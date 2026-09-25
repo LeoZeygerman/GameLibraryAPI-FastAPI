@@ -1,5 +1,9 @@
 from pydantic import BaseModel, ConfigDict
 from app.schemas.game import ResponseGameForGenre
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from app.schemas.game import ResponseGameForGenre
 
 class CreateGenre(BaseModel):
     genre_title: str
