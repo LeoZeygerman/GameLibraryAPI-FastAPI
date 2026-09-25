@@ -1,12 +1,13 @@
-from fastapi import HTTPException
+from fastapi import HTTPException, APIRouter
 from sqlalchemy import select
 from sqlalchemy.orm import selectinload
-from app.routers.game import router
 from app.schemas.platform import ResponsePlatform, CreatePlatform, ResponsePlatformWithGames
 from app.models.platform import PlatformsOrm
 from app.database import SessionDep
 
-@router.post('/platforms', summary='Добавить платформу', response_model=ResponsePlatform)
+router = APIRouter(prefix='/platforms', tags=['Платформы'])
+
+@router.post('/', summary='Добавить платформу', response_model=ResponsePlatform)
 async def create_platform(session: SessionDep, platform: CreatePlatform):
     new_platform = PlatformsOrm(platform_title = platform.platform_title)
     session.add(new_platform)
@@ -42,6 +43,8 @@ async def delete_platform(session: SessionDep, platform_id: int):
         .where(PlatformsOrm.id == platform_id)
         .options(selectinload(PlatformsOrm.games))
     )
-    session.delete(query)
+    if query is None:
+        raise HTTPException(status_code=404, detail='Платформа не найдена!')
+    await session.delete(query)
     await session.commit()
     return {'msg': 'Платформа удалена!'}

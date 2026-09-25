@@ -1,10 +1,11 @@
-from fastapi import HTTPException
+from fastapi import HTTPException, APIRouter
 from sqlalchemy import select
 from sqlalchemy.orm import selectinload
-from app.routers.game import router
 from app.database import SessionDep
 from app.schemas.genre import CreateGenre, ResponseGenre, ResponseGenreWithGames
 from app.models.genre import GenresOrm
+
+router = APIRouter(prefix='/genres', tags=['Жанры'])
 
 @router.post('/genres', summary='Добавить новый жанр', response_model=ResponseGenre)
 async def create_genre(session: SessionDep, genre: CreateGenre):
