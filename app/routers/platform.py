@@ -14,7 +14,8 @@ async def create_platform(session: SessionDep, platform: CreatePlatform):
     await session.refresh(new_platform)
     return new_platform
 
-@router.get('/platforms/{platform_id}', summary='Получить платформу по ID', response_model=ResponsePlatformWithGames)
+
+@router.get('/{platform_id}', summary='Получить платформу по ID', response_model=ResponsePlatformWithGames)
 async def get_platform_by_id(session: SessionDep, platform_id: int):
     platform = await session.scalar(
         select(PlatformsOrm)
@@ -24,3 +25,23 @@ async def get_platform_by_id(session: SessionDep, platform_id: int):
     if platform is None:
         raise HTTPException(status_code=404, detail='Платформа не найдена!')
     return platform
+
+
+@router.get('/', summary='Получить все платформы', response_model=list[ResponsePlatform])
+async def get_all_platforms(session: SessionDep):
+    query = await session.scalars(
+        select(PlatformsOrm)
+    )
+    return query.all()
+
+
+@router.delete('/{platform_id}', summary='Удалить платформу')
+async def delete_platform(session: SessionDep, platform_id: int):
+    query = await session.scalar(
+        select(PlatformsOrm)
+        .where(PlatformsOrm.id == platform_id)
+        .options(selectinload(PlatformsOrm.games))
+    )
+    session.delete(query)
+    await session.commit()
+    return {'msg': 'Платформа удалена!'}
