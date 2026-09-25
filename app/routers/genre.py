@@ -4,6 +4,7 @@ from sqlalchemy.orm import selectinload
 from app.database import SessionDep
 from app.schemas.genre import CreateGenre, ResponseGenre, ResponseGenreWithGames
 from app.models.genre import GenresOrm
+from app.models.game import GamesOrm
 
 router = APIRouter(prefix='/genres', tags=['Жанры'])
 
@@ -31,6 +32,7 @@ async def get_genre_by_id(session: SessionDep, genre_id: int):
         .where(GenresOrm.id == genre_id)
         .options(
             selectinload(GenresOrm.games)
+            .selectinload(GamesOrm.platform)
         )
     )
     if genre is None:
@@ -46,6 +48,6 @@ async def delete_genre(session: SessionDep, genre_id: int):
     )
     if query is None:
         raise HTTPException(status_code=404, detail='Жанр не найден!')
-    session.delete(query)
+    await session.delete(query)
     await session.commit()
     return {'msg': 'Жанр удален!'}

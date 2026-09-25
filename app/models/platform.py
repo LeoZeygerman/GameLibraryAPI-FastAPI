@@ -1,6 +1,9 @@
-from app.models import Base
+from app.models.base import Base
 from sqlalchemy.orm import Mapped, mapped_column, relationship
-from app.models import GamesOrm
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from app.models.game import GamesOrm
 
 class PlatformsOrm(Base):
     __tablename__ = 'platforms'

@@ -1,6 +1,7 @@
 from fastapi import APIRouter, HTTPException
 from sqlalchemy import select
 from sqlalchemy.orm import selectinload
+from sqlalchemy.exc import IntegrityError
 from app.database import SessionDep
 from app.schemas.game import CreateGame, ResponseGame, UpdateGame
 from app.models.game import GamesOrm
@@ -23,7 +24,7 @@ async def create_game(session: SessionDep, game: CreateGame):
         await session.flush()
 
     genres = []
-    for genre_title in game.genre:
+    for genre_title in game.genres:
         genre = await session.scalar(
                 select(GenresOrm)
                 .where(GenresOrm.genre_title == genre_title)
@@ -45,7 +46,11 @@ async def create_game(session: SessionDep, game: CreateGame):
         )
     
     session.add(new_game)
-    await session.commit()
+    try:
+        await session.commit()
+    except IntegrityError:
+        await session.rollback()
+        raise HTTPException(status_code=404, detail='Игра уже существует!')
 
     result = await session.execute(
         select(GamesOrm)
@@ -124,6 +129,15 @@ async def update_game(session: SessionDep, game_name: str, game: UpdateGame):
             new_genres.append(genre)
         result.genres = new_genres
 
+    db_result = await session.execute(
+        select(GamesOrm)
+        .where(GamesOrm.game_title == game.game_title)
+        .options(selectinload(GamesOrm.genres), selectinload(GamesOrm.platform))
+    )
+    db_game = db_result.scalar_one_or_none()
+    await session.commit()
+    await session.refresh(db_game)
+    return db_game
 
 @router.delete('/delete/{game_id}', summary='Удалить игру')
 async def delete_game(session: SessionDep, game_id: int):
@@ -137,6 +151,6 @@ async def delete_game(session: SessionDep, game_id: int):
     )
     if game is None:
         raise HTTPException(status_code=404, detail='Игра не найдена!')
-    session.delete(game)
+    await session.delete(game)
     await session.commit()
     return f'Игра удалена!'

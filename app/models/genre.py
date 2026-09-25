@@ -1,5 +1,9 @@
-from app.models import Base, GamesOrm
+from app.models.base import Base
 from sqlalchemy.orm import Mapped, mapped_column, relationship
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from app.models.game import GamesOrm
 
 class GenresOrm(Base):
     __tablename__ = 'genres'

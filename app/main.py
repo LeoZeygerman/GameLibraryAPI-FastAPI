@@ -1,3 +1,4 @@
+import app.schemas
 from contextlib import asynccontextmanager
 from fastapi import FastAPI
 from app.routers.platform import router as platform_router

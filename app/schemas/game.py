@@ -1,6 +1,4 @@
 from pydantic import BaseModel, ConfigDict
-from app.schemas.genre import ResponseGenre
-from app.schemas.platform import ResponsePlatform
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
@@ -19,8 +17,8 @@ class ResponseGame(BaseModel):
     game_title: str
     description: str
     release_year: int
-    platform: list[ResponsePlatform]
-    genres: list[ResponseGenre]
+    platform: 'ResponsePlatform'
+    genres: list['ResponseGenre']
 
     model_config = ConfigDict(from_attributes=True)
 
@@ -34,11 +32,11 @@ class UpdateGame(BaseModel):
 class ResponseGameForGenre(BaseModel):
     game_title: str
     release_year: int
-    platform: ResponsePlatform
+    platform: 'ResponsePlatform'
 
     model_config = ConfigDict(from_attributes=True)
 
 
 class ResponseGameForPlatform(BaseModel):
     game_title: str
-    genres: list[ResponseGenre]
+    genres: list['ResponseGenre']
