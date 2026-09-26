@@ -3,6 +3,7 @@ from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.models.game import GamesOrm
+from app.exception import NotFoundError
 
 async def get_game_by_name(session: AsyncSession, game_name:str) -> GamesOrm | None:
     result = await session.execute(
@@ -26,7 +27,8 @@ async def delete_game_by_id(session: AsyncSession, game_id: int):
         )
     )
     if query is None:
-        pass
+        raise NotFoundError(f'Игра не найдена!')
     await session.delete(query)
     await session.commit()
-    return {'msg': 'Игра удалена!'}
+
+
