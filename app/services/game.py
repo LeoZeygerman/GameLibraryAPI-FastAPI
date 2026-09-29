@@ -61,8 +61,9 @@ async def update_game(session: AsyncSession, title: str, data: UpdateGame) -> Ga
     game = await get_game_by_name(session, title)
     changes = data.model_dump(exclude_unset=True)
     await _apply_changes(session, game, changes)
+    await session.flush()
     await session.commit()
-    return await get_game_by_name(session, title)
+    return game
     
 
 
