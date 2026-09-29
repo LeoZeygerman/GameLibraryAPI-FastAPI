@@ -78,7 +78,7 @@ async def _apply_genres(session: AsyncSession, game: GamesOrm, value: list[str])
     game.genres = new_genres
 
 
-async def _apply_simple(field: str):
+def _apply_simple(field: str):
     async def setter(session: AsyncSession, game: GamesOrm, value: str):
         setattr(game, field, value)
     return setter

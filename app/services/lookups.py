@@ -28,6 +28,6 @@ async def create_or_get_platform(session: AsyncSession, title: str):
         platform = PlatformsOrm(
             platform_title = title
         )
-        session.add()
+        session.add(platform)
         await session.flush()
     return platform
