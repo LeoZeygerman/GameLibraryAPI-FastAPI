@@ -59,6 +59,11 @@ async def create_game(session: AsyncSession, game: CreateGame) -> GamesOrm:
 
 async def update_game(session: AsyncSession, title: str, data: UpdateGame) -> GamesOrm:
     game = await get_game_by_name(session, title)
+    changes = data.model_dump(exclude_unset=True)
+    await _apply_changes(session, game, changes)
+    await session.commit()
+    return await get_game_by_name(session, title)
+    
 
 
 async def _apply_platform(session: AsyncSession, game: GamesOrm, value: str):
@@ -74,7 +79,7 @@ async def _apply_genres(session: AsyncSession, game: GamesOrm, value: list[str])
 
 
 async def _apply_simple(field: str):
-    async def setter(session: AsyncSession, value: str, game: GamesOrm):
+    async def setter(session: AsyncSession, game: GamesOrm, value: str):
         setattr(game, field, value)
     return setter
 
@@ -88,6 +93,9 @@ _FIELD_HANDLERS = {
 }
 
 
-
-
-
+async def _apply_changes(session: AsyncSession, game: GamesOrm, changes: dict):
+    for field, value in changes.items():
+        handler = _FIELD_HANDLERS.get(field)
+        if handler is None:
+            raise NotFoundError(f'Передаваемый объект {field} не найден!')
+        await handler(session, game, value)
