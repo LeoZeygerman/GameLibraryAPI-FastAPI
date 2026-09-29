@@ -4,19 +4,21 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.models.game import GamesOrm
 from app.exception import NotFoundError
-from app.schemas.game import CreateGame
+from app.schemas.game import CreateGame, UpdateGame
 from app.services.lookups import create_or_get_genre, create_or_get_platform
 
-async def get_game_by_name(session: AsyncSession, game_name:str) -> GamesOrm | None:
-    result = await session.execute(
+async def get_game_by_name(session: AsyncSession, title:str) -> GamesOrm:
+    game = await session.scalar(
         select(GamesOrm)
-        .where(GamesOrm.game_title == game_name)
+        .where(GamesOrm.game_title == title)
         .options(
             selectinload(GamesOrm.platform),
             selectinload(GamesOrm.genres)
         )
     )
-    return result.scalar_one_or_none()
+    if game is None:
+        raise NotFoundError(f'Игра {title} не найдена!')
+    return game
 
 
 async def delete_game_by_id(session: AsyncSession, game_id: int):
@@ -34,7 +36,7 @@ async def delete_game_by_id(session: AsyncSession, game_id: int):
     await session.commit()
 
 
-async def create_game(session: AsyncSession, game: CreateGame):
+async def create_game(session: AsyncSession, game: CreateGame) -> GamesOrm:
     platform = await create_or_get_platform(session, game.platform)
 
     genres = []
@@ -53,3 +55,39 @@ async def create_game(session: AsyncSession, game: CreateGame):
     await session.flush()
     await session.commit()
     return new_game
+
+
+async def update_game(session: AsyncSession, title: str, data: UpdateGame) -> GamesOrm:
+    game = await get_game_by_name(session, title)
+
+
+async def _apply_platform(session: AsyncSession, game: GamesOrm, value: str):
+    game.platform = await create_or_get_platform(session, value)
+
+
+async def _apply_genres(session: AsyncSession, game: GamesOrm, value: list[str]):
+    new_genres = []
+    for title in value:
+        genre = await create_or_get_genre(session, title)
+        new_genres.append(genre)
+    game.genres = new_genres
+
+
+async def _apply_simple(field: str):
+    async def setter(session: AsyncSession, value: str, game: GamesOrm):
+        setattr(game, field, value)
+    return setter
+
+
+_FIELD_HANDLERS = {
+    'game_title': _apply_simple('game_title'),
+    'description': _apply_simple('description'),
+    'release_year': _apply_simple('release_year'),
+    'platform': _apply_platform,
+    'genres': _apply_genres
+}
+
+
+
+
+
