@@ -33,12 +33,13 @@ async def create_platform(session: AsyncSession, platform: CreatePlatform) -> Pl
         )
     )
     session.add(new_platform)
+    await session.flush()
     await session.commit()
     return new_platform
 
 
 async def delete_platform(session: AsyncSession, platform_id: int):
-    platform = get_platform_by_id(session, platform_id)
+    platform = await get_platform_by_id(session, platform_id)
     await session.delete(platform)
     await session.commit()
     return f'Платформа удалена!'
