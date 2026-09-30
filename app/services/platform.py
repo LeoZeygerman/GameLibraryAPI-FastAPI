@@ -32,6 +32,8 @@ async def create_platform(session: AsyncSession, platform: CreatePlatform) -> Pl
             platform_title = platform.platform_title
         )
     )
+    session.add(new_platform)
+    await session.commit()
     return new_platform
 
 

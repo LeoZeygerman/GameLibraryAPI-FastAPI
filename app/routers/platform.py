@@ -10,23 +10,23 @@ router = APIRouter(prefix='/platforms', tags=['Платформы'])
 
 @router.post('/', summary='Добавить платформу', response_model=ResponsePlatform)
 async def create_platform_router(session: SessionDep, platform: CreatePlatform):
-    new_platform = create_platform(session, platform)
+    new_platform = await create_platform(session, platform)
     return new_platform
 
 
 @router.get('/{platform_id}', summary='Получить платформу по ID', response_model=ResponsePlatformWithGames)
 async def get_platform_by_id_router(session: SessionDep, platform_id: int):
-    platform = get_platform_by_id(session, platform_id)
+    platform = await get_platform_by_id(session, platform_id)
     return platform
 
 
 @router.get('/', summary='Получить все платформы', response_model=list[ResponsePlatform])
 async def get_all_platforms_router(session: SessionDep):
-    platforms = get_all_platforms(session)
+    platforms = await get_all_platforms(session)
     return platforms
 
 
 @router.delete('/{platform_id}', summary='Удалить платформу')
 async def delete_platform_router(session: SessionDep, platform_id: int):
-    platform = delete_platform(session, platform_id)
+    platform = await delete_platform(session, platform_id)
     return platform
