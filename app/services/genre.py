@@ -3,6 +3,7 @@ from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.exception import NotFoundError
+from app.models.game import GamesOrm
 from app.models.genre import GenresOrm
 from app.schemas.genre import CreateGenre
 
@@ -11,7 +12,10 @@ async def get_genre_by_id(session: AsyncSession, genre_id: int):
     genre = await session.scalar(
         select(GenresOrm)
         .where(GenresOrm.id == genre_id)
-        .options(selectinload(GenresOrm.games))
+        .options(
+            selectinload(GenresOrm.games)
+            .selectinload(GamesOrm.platform)
+        )
     )
     if genre is None:
         raise NotFoundError(f'Жанр не найден!')
@@ -32,7 +36,7 @@ async def create_genre(session: AsyncSession, genre: CreateGenre):
     session.add(new_genre)
     await session.flush()
     await session.commit()
-    return get_genre_by_id(session, new_genre.id)
+    return new_genre
 
 
 async def delete_genre(session: AsyncSession, genre_id: int):

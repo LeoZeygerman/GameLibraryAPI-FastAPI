@@ -3,6 +3,7 @@ from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.exception import NotFoundError
+from app.models.game import GamesOrm
 from app.models.platform import PlatformsOrm
 from app.schemas.platform import CreatePlatform
 
@@ -10,9 +11,10 @@ async def get_platform_by_id(session: AsyncSession, platform_id: int) -> Platfor
     platform = await session.scalar(
         select(PlatformsOrm)
         .where(PlatformsOrm.id == platform_id)
-        .options(selectinload(
-            PlatformsOrm.games
-        ))
+        .options(
+            selectinload(PlatformsOrm.games)
+            .selectinload(GamesOrm.genres)
+            )
     )
     if platform is None:
         raise NotFoundError(f'Платформа с таким ID не найдена')
