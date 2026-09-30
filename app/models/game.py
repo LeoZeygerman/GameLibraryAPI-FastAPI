@@ -15,7 +15,7 @@ class GamesOrm(Base):
     description: Mapped[str]
     release_year: Mapped[int]
 
-    platform_id: Mapped[int] = mapped_column(ForeignKey('platforms.id', ondelete='SET NULL'), nullable=True)
+    platform_id: Mapped[int | None] = mapped_column(ForeignKey('platforms.id', ondelete='SET NULL'))
 
     platform: Mapped['PlatformsOrm'] = relationship(
         back_populates='games'
