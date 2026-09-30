@@ -4,47 +4,29 @@ from sqlalchemy.orm import selectinload
 from app.schemas.platform import ResponsePlatform, CreatePlatform, ResponsePlatformWithGames
 from app.models.platform import PlatformsOrm
 from app.database import SessionDep
+from app.services.platform import create_platform, delete_platform, get_all_platforms, get_platform_by_id
 
 router = APIRouter(prefix='/platforms', tags=['Платформы'])
 
 @router.post('/', summary='Добавить платформу', response_model=ResponsePlatform)
-async def create_platform(session: SessionDep, platform: CreatePlatform):
-    new_platform = PlatformsOrm(platform_title = platform.platform_title)
-    session.add(new_platform)
-    await session.commit()
-    await session.refresh(new_platform)
+async def create_platform_router(session: SessionDep, platform: CreatePlatform):
+    new_platform = create_platform(session, platform)
     return new_platform
 
 
 @router.get('/{platform_id}', summary='Получить платформу по ID', response_model=ResponsePlatformWithGames)
-async def get_platform_by_id(session: SessionDep, platform_id: int):
-    platform = await session.scalar(
-        select(PlatformsOrm)
-        .where(PlatformsOrm.id == platform_id)
-        .options(selectinload(PlatformsOrm.games))
-    )
-    if platform is None:
-        raise HTTPException(status_code=404, detail='Платформа не найдена!')
+async def get_platform_by_id_router(session: SessionDep, platform_id: int):
+    platform = get_platform_by_id(session, platform_id)
     return platform
 
 
 @router.get('/', summary='Получить все платформы', response_model=list[ResponsePlatform])
-async def get_all_platforms(session: SessionDep):
-    query = await session.scalars(
-        select(PlatformsOrm)
-    )
-    return query.all()
+async def get_all_platforms_router(session: SessionDep):
+    platforms = get_all_platforms(session)
+    return platforms
 
 
 @router.delete('/{platform_id}', summary='Удалить платформу')
-async def delete_platform(session: SessionDep, platform_id: int):
-    query = await session.scalar(
-        select(PlatformsOrm)
-        .where(PlatformsOrm.id == platform_id)
-        .options(selectinload(PlatformsOrm.games))
-    )
-    if query is None:
-        raise HTTPException(status_code=404, detail='Платформа не найдена!')
-    await session.delete(query)
-    await session.commit()
-    return {'msg': 'Платформа удалена!'}
+async def delete_platform_router(session: SessionDep, platform_id: int):
+    platform = delete_platform(session, platform_id)
+    return platform
