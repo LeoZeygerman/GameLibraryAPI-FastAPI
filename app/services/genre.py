@@ -33,3 +33,10 @@ async def create_genre(session: AsyncSession, genre: CreateGenre):
     await session.flush()
     await session.commit()
     return get_genre_by_id(session, new_genre.id)
+
+
+async def delete_genre(session: AsyncSession, genre_id: int):
+    genre = await get_genre_by_id(session, genre_id)
+    await session.delete(genre)
+    await session.commit()
+    return {f'Жанр удален!'}
