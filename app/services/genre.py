@@ -17,6 +17,14 @@ async def get_genre_by_id(session: AsyncSession, genre_id: int):
         raise NotFoundError(f'Жанр не найден!')
     return genre
 
+
+async def get_all_genres(session: AsyncSession):
+    genres = await session.scalars(
+        select(GenresOrm)
+    )
+    return genres.all()
+
+
 async def create_genre(session: AsyncSession, genre: CreateGenre):
     new_genre = GenresOrm(
         genre_title = genre.genre_title
