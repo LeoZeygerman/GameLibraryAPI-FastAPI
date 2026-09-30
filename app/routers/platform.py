@@ -1,10 +1,7 @@
-from fastapi import HTTPException, APIRouter
-from sqlalchemy import select
-from sqlalchemy.orm import selectinload
-from app.schemas.platform import ResponsePlatform, CreatePlatform, ResponsePlatformWithGames
-from app.models.platform import PlatformsOrm
+from fastapi import APIRouter
+from app.schemas.platform import *
 from app.database import SessionDep
-from app.services.platform import create_platform, delete_platform, get_all_platforms, get_platform_by_id
+from app.services.platform import *
 
 router = APIRouter(prefix='/platforms', tags=['Платформы'])
 

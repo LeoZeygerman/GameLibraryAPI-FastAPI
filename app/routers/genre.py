@@ -1,11 +1,7 @@
-from fastapi import HTTPException, APIRouter
-from sqlalchemy import select
-from sqlalchemy.orm import selectinload
+from fastapi import APIRouter
 from app.database import SessionDep
-from app.schemas.genre import CreateGenre, ResponseGenre, ResponseGenreWithGames
-from app.models.genre import GenresOrm
-from app.models.game import GamesOrm
-from app.services.genre import create_genre, delete_genre, get_all_genres, get_genre_by_id
+from app.schemas.genre import *
+from app.services.genre import *
 
 router = APIRouter(prefix='/genres', tags=['Жанры'])
 

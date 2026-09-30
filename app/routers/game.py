@@ -1,9 +1,6 @@
-from fastapi import APIRouter, HTTPException
-from sqlalchemy import select
-from sqlalchemy.orm import selectinload
+from fastapi import APIRouter
 from app.database import SessionDep
-from app.schemas.game import CreateGame, ResponseGame, UpdateGame
-from app.models.game import GamesOrm
+from app.schemas.game import *
 from app.services.game import *
 
 router = APIRouter(prefix='/games', tags=['Игры'])
