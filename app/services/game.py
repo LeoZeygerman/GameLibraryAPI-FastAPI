@@ -22,7 +22,7 @@ async def get_game_by_name(session: AsyncSession, title:str) -> GamesOrm:
 
 
 async def delete_game_by_id(session: AsyncSession, game_id: int):
-    query = await session.scalar(
+    game = await session.scalar(
         select(GamesOrm)
         .where(GamesOrm.id == game_id)
         .options(
@@ -30,10 +30,11 @@ async def delete_game_by_id(session: AsyncSession, game_id: int):
             selectinload(GamesOrm.platform)
         )
     )
-    if query is None:
+    if game is None:
         raise NotFoundError(f'Игра не найдена!')
-    await session.delete(query)
+    await session.delete(game)
     await session.commit()
+    return {'msg': 'Игра удалена!'}
 
 
 async def create_game(session: AsyncSession, game: CreateGame) -> GamesOrm:
